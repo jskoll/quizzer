@@ -12,11 +12,13 @@ plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
     java
+
 }
 
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+    maven("https://jitpack.io")
 }
 
 kotlin {
@@ -25,6 +27,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.4")
                 implementation ("com.google.code.gson:gson:2.8.5")
                 implementation("com.github.ajalt.mordant:mordant:2.0.0-beta4")
+                implementation("com.github.kotlin-inquirer:kotlin-inquirer:0.1.0")
             }
     }
 }

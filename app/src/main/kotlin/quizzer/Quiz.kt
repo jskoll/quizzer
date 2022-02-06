@@ -12,6 +12,8 @@ package quizzer
 import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyles.*
 import com.github.ajalt.mordant.terminal.Terminal
+import com.github.kinquirer.KInquirer
+import com.github.kinquirer.components.*
 import com.google.gson.Gson
 import java.io.File
 import java.util.*
@@ -59,6 +61,7 @@ class Quiz  (
      * @return Boolean the status of the question file.  True if created or false otherwise
      */
     fun createQuestions(questionFile: String): Boolean {
+        clearConsole()
         var isQuestion = false;
         var isAnswer = false;
         var question = Question()
@@ -87,6 +90,7 @@ class Quiz  (
                                 if (question.validate()) {
                                     questionList.add(question);
                                 } else {
+                                    println(question)
                                     throw IllegalArgumentException("Question #$qCount is invalid")
                                 }
                             }
@@ -128,45 +132,28 @@ class Quiz  (
             val text = selectedQuestions[q]
             val correctAns = text.correctAnswer.toInt()
             do {
-                println("${q + 1}: ${text.questionText}")
-                for (x in 0 until text.answers.size) {
-                    println("${x + 1}. ${text.answers[x]}")
-                }
-                print(green("Which is the correct answer? [$correctAns] "))
+                val questionDisplay: String = KInquirer.promptList(
+                    message = "${q+1}: ${text.questionText}",
+                    choices = text.answers,
+                    hint = "Use the arrow keys to navigate options and click Enter to select"
+                )
+                val ans = text.answers.indexOf(questionDisplay) + 1
                 var validResponse = false
-                val ans = readLine();
-                try {
-                    val i = ans?.toInt()
-                    if (i != null) {
-                        if (i < 1 || i > text.answers.size)
-                            throw NumberFormatException()
-                    } else {
-                        throw NumberFormatException()
-                    }
-                    validResponse = true
+                if (ans < 1 || ans > text.answers.size)
+                    throw NumberFormatException()
+                validResponse = true
 
-                    if (i == correctAns) {
-                        correctAnswers++
-                    }
-                } catch (ne: NumberFormatException) {
-                    println(magenta("\nPlease pick a number from 1 - ${text.answers.size} \n"))
-                    validResponse = false
+                if (ans == correctAns) {
+                    correctAnswers++
                 }
+
                 val timeLeft = maxTime - (System.currentTimeMillis() - startTime)
                 if (timeLeft < 0)
                     break@quiz
-
-                if (validResponse) {
-                    t.cursor.move {
-                        up(80)
-                        startOfLine()
-                        clearScreenAfterCursor()
-                    }
-                    t.cursor.hide(showOnExit = false)
-                }
-                println(green("TimeLeft: ${formatTimeFromMilliseconds(timeLeft)} \n"))
             } while (!validResponse)
         }
+
+        clearConsole()
         println(blue("Quiz has finished you got $correctAnswers out of ${selectedQuestions.size} " +
                 "answers correct."))
         val percent = round(correctAnswers.toFloat() / selectedQuestions.size * 100).toInt()
@@ -217,5 +204,13 @@ class Quiz  (
         val seconds = elapsedTime / millisecondsInSecond % secondsInMinute
 
         return "$minutes minutes and $seconds seconds"
+    }
+
+    private fun clearConsole() {
+        if (System.getProperty("os.name").contains("Windows")) {
+            ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor()
+        } else {
+            print("\u001b\u0063")
+        }
     }
 }
