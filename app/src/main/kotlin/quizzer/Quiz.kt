@@ -16,6 +16,8 @@ import com.google.gson.Gson
 import java.io.File
 import java.util.*
 import javax.naming.directory.InvalidAttributesException
+import kotlin.io.path.Path
+import kotlin.io.path.absolutePathString
 import kotlin.math.round
 
 class Quiz  (
@@ -36,7 +38,7 @@ class Quiz  (
      */
     fun getQuestions() {
         val qList = gson.fromJson(File(savedQuestionFile).readText(), Array<Question>::class.java).asList()
-        val totalQuestions = qList.size - 1
+        val totalQuestions = qList.size
         if (totalQuestions < numberOfQuestions!!) {
             throw InvalidAttributesException("More questions than exist in the file requested")
         }
@@ -63,7 +65,11 @@ class Quiz  (
         val questionList = mutableSetOf<Question>()
         var qCount = 0;
         val startTime = System.currentTimeMillis()
-        File("./$questionFile").forEachLine {
+        val path = Path(questionFile).absolutePathString()
+        if (path.isBlank()) {
+            throw java.lang.IllegalArgumentException("File not found")
+        }
+        File(path).forEachLine {
             if (it.isNotEmpty()) { // ignore empty lines
                 val firstCar: String = it.substring(0, 1);
                 if (firstCar != "*") { // ignore comment lines
