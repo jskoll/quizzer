@@ -48,8 +48,8 @@ class Question() {
      */
     fun validate(): Boolean = (
         questionText.trim().isNotEmpty()
-        || correctAnswer.trim().isNotEmpty()
-        || answers.size > 0
-        || (correctAnswer.toInt() > 0 && correctAnswer.toInt() in 0..answers.size)
+            && correctAnswer.trim().isNotEmpty()
+            && answers.size > 0
+            && (correctAnswer.toIntOrNull() != null && correctAnswer.toInt() in 0 until answers.size)
     )
 }
