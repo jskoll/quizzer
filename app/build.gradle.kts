@@ -24,6 +24,7 @@ kotlin {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.4")
                 implementation ("com.google.code.gson:gson:2.8.5")
+                implementation("com.github.ajalt.mordant:mordant:2.0.0-beta4")
             }
     }
 }
@@ -43,7 +44,6 @@ dependencies {
 
     // Use the Kotlin JUnit integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
-
 }
 
 application {

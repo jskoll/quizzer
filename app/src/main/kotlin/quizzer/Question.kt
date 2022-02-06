@@ -1,43 +1,39 @@
+/******************************************************************************
+ * Question class for Quizzer
+ *
+ * This file is a very simple class that represents a question that can be
+ * asked during a quiz
+ *
+ * The class contains:
+ *      1. The text (String) of the question
+ *      2. A list<String> of possible answers
+ *      3. The index (as a String) of the correct answer
+ *
+ *  The class also includes a few member methods:
+ *      1. toString that returns a JSON formatted string of the question
+ *      2. validate that validates that the questions provided are valid
+ *          - has question text
+ *          - has at least 1 answer in the answer list
+ *          - has a correctAnswer index that exists in the answer list
+ *
+ *  @author Jason Skollingsberg <js032@mix.wvu.edu>
+ *  @since Feb 5, 2022
+ *  @version 1.0.0-beta
+ ****************************************************************************/
+
 package quizzer
 
 import com.google.gson.Gson
-import java.io.File
 
 class Question() {
-    companion object{
-        @JvmStatic
-        val fileExtension = "qson"
-    }
     var questionText: String = ""
     var correctAnswer: String = ""
     var answers = mutableListOf<String>()
 
-    private val questionFolder = "questions"
-
+    /**
+     * @return a JSON formated string
+     */
     override fun toString(): String {
-        return toJson()
-    }
-
-    fun validate(): Boolean {
-        return  (
-            questionText.trim().isNotEmpty()
-            || correctAnswer.trim().isNotEmpty()
-            || answers.size > 0
-        )
-    }
-
-    fun writeToDisk(name: String) {
-        val directory = File("./$questionFolder")
-        directory.mkdirs()
-        File("$questionFolder/$name.$fileExtension").writeText(toJson())
-    }
-
-    fun getQuestion(name: Int): Question {
-        val gson = Gson()
-        return gson.fromJson(File("$questionFolder/$name.$fileExtension").readText(), Question::class.java)
-    }
-
-    private fun toJson(): String {
         val gson = Gson()
         val simpleJson = mapOf(
             "questionText" to questionText,
@@ -46,4 +42,14 @@ class Question() {
         )
         return gson.toJson(simpleJson)
     }
+
+    /**
+     * @return Boolean indicating the question is valid or not
+     */
+    fun validate(): Boolean = (
+        questionText.trim().isNotEmpty()
+        || correctAnswer.trim().isNotEmpty()
+        || answers.size > 0
+        || (correctAnswer.toInt() > 0 && correctAnswer.toInt() in 0..answers.size)
+    )
 }
