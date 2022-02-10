@@ -39,12 +39,13 @@ class Quiz  (
      * Ensures that no question is added more than once to a quiz
      */
     fun getQuestions() {
-        val qList = gson.fromJson(File(savedQuestionFile).readText(), Array<Question>::class.java).asList()
+        val path = Path(savedQuestionFile).absolutePathString()
+        val qList = gson.fromJson(File(path).readText(), Array<Question>::class.java).asList()
         val totalQuestions = qList.size
         if (totalQuestions < numberOfQuestions!!) {
             throw InvalidAttributesException("More questions than exist in the file requested")
         }
-        while (selectedQuestions.count() < numberOfQuestions!!) {
+        while (selectedQuestions.count() < numberOfQuestions) {
             val questionNum = (0..totalQuestions).random()
             if (qList[questionNum] !in selectedQuestions) {
                 selectedQuestions.add(qList[questionNum])
@@ -69,9 +70,6 @@ class Quiz  (
         var qCount = 0;
         val startTime = System.currentTimeMillis()
         val path = Path(questionFile).absolutePathString()
-        if (path.isBlank()) {
-            throw java.lang.IllegalArgumentException("File not found")
-        }
         File(path).forEachLine {
             if (it.isNotEmpty()) { // ignore empty lines
                 val firstCar: String = it.substring(0, 1);
@@ -186,7 +184,7 @@ class Quiz  (
         } else if (question && answer) {
             if (!hasAns) {
                 hasAns = true
-                q.correctAnswer = it
+                q.correctAnswer = (it.toInt() - 1).toString()
             } else {
                 q.answers.add(it)
             }
@@ -206,6 +204,9 @@ class Quiz  (
         return "$minutes minutes and $seconds seconds"
     }
 
+    /**
+     * Simple method to clear the console for a cleaner appearance on the cli
+     */
     private fun clearConsole() {
         if (System.getProperty("os.name").contains("Windows")) {
             ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor()
