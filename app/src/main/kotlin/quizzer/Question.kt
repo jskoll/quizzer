@@ -50,6 +50,6 @@ class Question() {
         questionText.trim().isNotEmpty()
             && correctAnswer.trim().isNotEmpty()
             && answers.size > 0
-            && (correctAnswer.toIntOrNull() != null && correctAnswer.toInt() in 1 .. answers.size)
+            && (correctAnswer.toIntOrNull() != null && correctAnswer.toInt() in 0 .. answers.size)
     )
 }

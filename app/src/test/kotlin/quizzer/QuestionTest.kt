@@ -22,7 +22,7 @@ class QuestionTest {
         val question = Question()
         question.questionText = "ABC123"
         question.answers = mutableListOf("0", "1")
-        question.correctAnswer = "2"
+        question.correctAnswer = "6"
         assertFalse { question.validate() }
     }
 
