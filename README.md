@@ -27,6 +27,9 @@ For Windows the executable is `app.bat`
 
 For MacOS/Linux the executable is `app`
 
+**Note** The app will let the user know if the answer was incorrect or not for 1 second before the next 
+question (or final grade) is displayed
+
 ### CLI Options
 As with most CLI apps this app provides a help options to view all options provided. 
 

@@ -124,16 +124,22 @@ class Quiz  (
     fun start() {
         val t = Terminal()
         var correctAnswers = 0
+        var preText: String = ""
         val startTime = System.currentTimeMillis()
         println(cyan("\nStarting Quiz of ${selectedQuestions.size} questions\n"))
         quiz@ for (q in 0 until selectedQuestions.size) {
             val text = selectedQuestions[q]
             val correctAns = text.correctAnswer.toInt()
             do {
+                if (preText.length != 0) {
+                    println(preText)
+                    Thread.sleep(1000);
+                }
                 val questionDisplay: String = KInquirer.promptList(
                     message = "${q+1}: ${text.questionText}",
                     choices = text.answers,
-                    hint = "Use the arrow keys to navigate options and click Enter to select"
+                    hint = "Use the arrow keys to navigate options and click Enter to select",
+                    pageSize = 6
                 )
                 val ans = text.answers.indexOf(questionDisplay) + 1
                 var validResponse = false
@@ -143,7 +149,12 @@ class Quiz  (
 
                 if (ans == correctAns) {
                     correctAnswers++
+                    preText = blue("Congratulations! Your answer is correct.")
+                } else {
+                    preText = red("Sorry, your answer was not correct")
                 }
+
+
 
                 val timeLeft = maxTime - (System.currentTimeMillis() - startTime)
                 if (timeLeft < 0)
@@ -151,6 +162,8 @@ class Quiz  (
             } while (!validResponse)
         }
 
+        println(preText)
+        Thread.sleep(1000);
         clearConsole()
         println(blue("Quiz has finished you got $correctAnswers out of ${selectedQuestions.size} " +
                 "answers correct."))
