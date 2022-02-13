@@ -17,13 +17,15 @@ The `quizzer.zip` file has executables that work on Windows 7/10 and MacOS.  It 
 Linux (or any system with JVM) but is untested in that environment.
 
 ## Running  quizzer
-Once you have the `quizzer.zip` file downloaded unzip it
+Download a release from this [repo](https://github.com/jskoll/quizzer/releases/tag/1.0.0-beta.1)
+
+Extact the file (untar or unzip)
 
 In the extracted folder you will find the executable files in `app\bin`.
 
 For Windows the executable is `app.bat`
 
-For MacOS the executable is `app`
+For MacOS/Linux the executable is `app`
 
 ### CLI Options
 As with most CLI apps this app provides a help options to view all options provided. 
@@ -62,3 +64,5 @@ app.
    1. Apache-2.0 License
 2. [kotlin-inquirer](https://github.com/kotlin-inquirer/kotlin-inquirer) -- Allowed a more interactive CLI
    1. Apache-2.0 License
+3 [GSON](https://github.com/google/gson) -- for creating/reading JSON
+	1.  Apache-2.0 License
