@@ -105,8 +105,8 @@ class Quiz  (
         }
         File(savedQuestionFile).delete()
         File(savedQuestionFile).writeText(gson.toJson(questionList))
-        println(blue("Added ${questionList.size} questions"))
-        println(blue("Import took ${System.currentTimeMillis() - startTime}ms"))
+        println("Added ${questionList.size} questions")
+        println("Import took ${System.currentTimeMillis() - startTime}ms")
         println()
         return true
     }
@@ -126,12 +126,12 @@ class Quiz  (
         var correctAnswers = 0
         var preText: String = ""
         val startTime = System.currentTimeMillis()
-        println(cyan("\nStarting Quiz of ${selectedQuestions.size} questions\n"))
+        println("\nStarting Quiz of ${selectedQuestions.size} questions\n")
         quiz@ for (q in 0 until selectedQuestions.size) {
             val text = selectedQuestions[q]
             val correctAns = text.correctAnswer.toInt()
             do {
-                if (preText.length != 0) {
+                if (preText.isNotEmpty()) {
                     println(preText)
                     Thread.sleep(1000);
                 }
@@ -149,9 +149,9 @@ class Quiz  (
 
                 if (ans == correctAns) {
                     correctAnswers++
-                    preText = blue("Congratulations! Your answer is correct.")
+                    preText = "Congratulations! Your answer is correct."
                 } else {
-                    preText = red("Sorry, your answer was not correct")
+                    preText = "Sorry, your answer was not correct"
                 }
 
 
@@ -165,8 +165,8 @@ class Quiz  (
         println(preText)
         Thread.sleep(1000);
         clearConsole()
-        println(blue("Quiz has finished you got $correctAnswers out of ${selectedQuestions.size} " +
-                "answers correct."))
+        println("Quiz has finished you got $correctAnswers out of ${selectedQuestions.size} " +
+                "answers correct.")
         val percent = round(correctAnswers.toFloat() / selectedQuestions.size * 100).toInt()
         val letterGrade = when {
             percent >= 90 -> "A"
@@ -176,15 +176,15 @@ class Quiz  (
             else -> "F"
 
         }
-        println(blue("Your final score is $percent%"))
-        print(blue("Your grade is "))
+        println("Your final score is $percent%")
+        print("Your grade is ")
         if (percent > 70) {
-            println(brightBlue(letterGrade))
+            println(letterGrade)
         } else {
-            println(brightRed(letterGrade))
+            println(letterGrade)
         }
         val quizTime = formatTimeFromMilliseconds(System.currentTimeMillis() - startTime)
-        println(yellow("\nThis quiz took $quizTime to complete"))
+        println("\nThis quiz took $quizTime to complete")
     }
 
     /**

@@ -9,12 +9,12 @@ existing `questions.qson` file it will use it.
 
 ## Prerequisites for quizzer
 This app is written in Kotlin as a command line app and compiles down to a JVM compatible executable.  
-The only requirement to run this file is that `JAVA_HOME` exists.  
-This only requires that Java is installed on the system. The install of Java sets this env variable. 
+The only requirement to run this file is that Java is installed.
+
 If needed you can download the Java install [here](https://java.com)
 
-The `quizzer.zip` file has executables that work on Windows 7/10 and MacOS.  It is probable that it runs 
-Linux (or any system with JVM) but is untested in that environment.
+The `quizzer.zip` file has executables that work on Windows 7/10, MacOS 12.2 (likely to work on older versions but only
+tested on 12.2), and Ubuntu 20.04 (likely on any linux based system but only tested on Ubuntu)
 
 ## Running  quizzer
 Download a release from this [repo](https://github.com/jskoll/quizzer/releases/tag/1.0.0-beta.1)
@@ -67,5 +67,5 @@ app.
    1. Apache-2.0 License
 2. [kotlin-inquirer](https://github.com/kotlin-inquirer/kotlin-inquirer) -- Allowed a more interactive CLI
    1. Apache-2.0 License
-3 [GSON](https://github.com/google/gson) -- for creating/reading JSON
+3. [GSON](https://github.com/google/gson) -- for creating/reading JSON
 	1.  Apache-2.0 License
