@@ -11,10 +11,10 @@ package quizzer
 
 import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyles.*
-import com.github.ajalt.mordant.terminal.Terminal
 import com.github.kinquirer.KInquirer
 import com.github.kinquirer.components.*
 import com.google.gson.Gson
+import quizzer.utility.getLogger
 import java.io.File
 import java.util.*
 import javax.naming.directory.InvalidAttributesException
@@ -23,6 +23,7 @@ import kotlin.io.path.absolutePathString
 import kotlin.math.round
 
 class Quiz  (
+    private val uuid: UUID,
     private val numberOfQuestions: Int? = 10,
     timeLimit: Int? = 10
 ) {
@@ -43,11 +44,14 @@ class Quiz  (
         val qList = gson.fromJson(File(path).readText(), Array<Question>::class.java).asList()
         val totalQuestions = qList.size
         if (totalQuestions < numberOfQuestions!!) {
+            getLogger().error("Quiz $uuid: unable to get questions, more questions ($numberOfQuestions) requested" +
+                    "than available ($totalQuestions)")
             throw InvalidAttributesException("More questions than exist in the file requested")
         }
         while (selectedQuestions.count() < numberOfQuestions) {
             val questionNum = (0..totalQuestions).random()
             if (qList[questionNum] !in selectedQuestions) {
+                getLogger().debug("Quiz $uuid: adding question $questionNum to quiz")
                 selectedQuestions.add(qList[questionNum])
             }
         }
@@ -63,16 +67,17 @@ class Quiz  (
      */
     fun createQuestions(questionFile: String): Boolean {
         clearConsole()
-        var isQuestion = false;
-        var isAnswer = false;
+        var isQuestion = false
+        var isAnswer = false
         var question = Question()
         val questionList = mutableSetOf<Question>()
-        var qCount = 0;
+        var qCount = 0
         val startTime = System.currentTimeMillis()
         val path = Path(questionFile).absolutePathString()
+        getLogger().debug("Quiz $uuid: Importing questions from $path")
         File(path).forEachLine {
             if (it.isNotEmpty()) { // ignore empty lines
-                val firstCar: String = it.substring(0, 1);
+                val firstCar: String = it.substring(0, 1)
                 if (firstCar != "*") { // ignore comment lines
                     if (it[0] =='@') {
                         when (it.trim().substring(0, 2).uppercase()) {
@@ -86,9 +91,9 @@ class Quiz  (
                                 isQuestion = false
                                 isAnswer = false
                                 if (question.validate()) {
-                                    questionList.add(question);
+                                    questionList.add(question)
                                 } else {
-                                    println(question)
+                                    getLogger().debug("Quiz $uuid: Question $qCount from file $path is invalid")
                                     throw IllegalArgumentException("Question #$qCount is invalid")
                                 }
                             }
@@ -101,12 +106,14 @@ class Quiz  (
             }
         }
         if (questionList.size == 0) {
+            getLogger().debug("Quiz $uuid: $path had no questions")
             return false
         }
         File(savedQuestionFile).delete()
         File(savedQuestionFile).writeText(gson.toJson(questionList))
-        println("Added ${questionList.size} questions")
-        println("Import took ${System.currentTimeMillis() - startTime}ms")
+        val elapseTime = "${System.currentTimeMillis() - startTime}ms"
+        getLogger().info("Quiz $uuid: Added ${questionList.size} questions in $elapseTime")
+        println("Added ${questionList.size} questions in $elapseTime")
         println()
         return true
     }
@@ -122,9 +129,8 @@ class Quiz  (
      *      - Displays a score and grade at the end of the quiz
      */
     fun start() {
-        val t = Terminal()
         var correctAnswers = 0
-        var preText: String = ""
+        var preText = ""
         val startTime = System.currentTimeMillis()
         println("\nStarting Quiz of ${selectedQuestions.size} questions\n")
         quiz@ for (q in 0 until selectedQuestions.size) {
@@ -133,7 +139,7 @@ class Quiz  (
             do {
                 if (preText.isNotEmpty()) {
                     println(preText)
-                    Thread.sleep(1000);
+                    Thread.sleep(1000)
                 }
                 val questionDisplay: String = KInquirer.promptList(
                     message = "${q+1}: ${text.questionText}",
@@ -142,16 +148,17 @@ class Quiz  (
                     pageSize = 6
                 )
                 val ans = text.answers.indexOf(questionDisplay) + 1
-                var validResponse = false
                 if (ans < 1 || ans > text.answers.size)
                     throw NumberFormatException()
-                validResponse = true
 
-                if (ans == correctAns) {
+                getLogger().info("Quiz $uuid: Asking question ${q+1}: `${text.questionText}`")
+                preText = if (ans == correctAns) {
+                    getLogger().info("Quiz $uuid: Question ${q+1}: answered correctly")
                     correctAnswers++
-                    preText = "Congratulations! Your answer is correct."
+                    "Congratulations! Your answer is correct."
                 } else {
-                    preText = "Sorry, your answer was not correct"
+                    getLogger().info("Quiz $uuid: Question ${q+1}: answered incorrectly")
+                    "Sorry, your answer was not correct"
                 }
 
 
@@ -159,14 +166,15 @@ class Quiz  (
                 val timeLeft = maxTime - (System.currentTimeMillis() - startTime)
                 if (timeLeft < 0)
                     break@quiz
-            } while (!validResponse)
+            } while (true)
         }
 
         println(preText)
-        Thread.sleep(1000);
+        Thread.sleep(1000)
         clearConsole()
         println("Quiz has finished you got $correctAnswers out of ${selectedQuestions.size} " +
                 "answers correct.")
+        getLogger().info("Quiz $uuid: finished $correctAnswers out of ${selectedQuestions.size} correct")
         val percent = round(correctAnswers.toFloat() / selectedQuestions.size * 100).toInt()
         val letterGrade = when {
             percent >= 90 -> "A"
@@ -178,12 +186,9 @@ class Quiz  (
         }
         println("Your final score is $percent%")
         print("Your grade is ")
-        if (percent > 70) {
-            println(letterGrade)
-        } else {
-            println(letterGrade)
-        }
+        println(letterGrade)
         val quizTime = formatTimeFromMilliseconds(System.currentTimeMillis() - startTime)
+        getLogger().info("Quiz $uuid: Score $percent: Grade $letterGrade in $quizTime")
         println("\nThis quiz took $quizTime to complete")
     }
 

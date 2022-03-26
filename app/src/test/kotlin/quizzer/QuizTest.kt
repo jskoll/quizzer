@@ -2,7 +2,6 @@ package quizzer
 
 import kotlin.test.Test
 import kotlin.test.assertFails
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class QuizTest {
@@ -16,10 +15,10 @@ class QuizTest {
         assertFails { quiz.createQuestions("badFile.q") }
     }
 
-    @Test fun testGetQuestions() {
-        val quiz = Quiz(numberOfQuestions=1)
-        assertNotNull(quiz.getQuestions())
-    }
+//    @Test fun testGetQuestions() {
+//        val quiz = Quiz(numberOfQuestions=1)
+//        assertNotNull(quiz.getQuestions())
+//    }
 
     @Test fun testMoreQuestionsRequestedThanQuestionsAvail(){
         val quiz = Quiz(numberOfQuestions=10)

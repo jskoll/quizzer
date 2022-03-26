@@ -22,16 +22,12 @@
 
 package quizzer
 
-import mu.KotlinLogging
 import quizzer.utility.OS
-import quizzer.utility.getLogger
 import quizzer.utility.getOS
-
-private val logger = KotlinLogging.logger {}
+import java.util.*
 
 fun main(args: Array<String>) {
     val os = getOS()
-    getLogger().debug("Hello, Logging")
     if (os == OS.MAC || os == OS.LINUX) {
         val nixQuizzer = NixQuizzer()
         nixQuizzer.run(args)
@@ -42,3 +38,5 @@ fun main(args: Array<String>) {
         winQuizzer.run()
     }
 }
+
+fun getUUid(): UUID = UUID.randomUUID()

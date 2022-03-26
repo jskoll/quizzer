@@ -3,11 +3,14 @@ package quizzer
 import com.github.ajalt.mordant.rendering.TextColors
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
+import quizzer.utility.getLogger
 import java.io.FileNotFoundException
 import javax.naming.directory.InvalidAttributesException
 
 class NixQuizzer {
+    private val uuid = getUUid()
     fun run(args: Array<String>) {
+        getLogger().info("Quiz $uuid starting");
         val parser = ArgParser("Quizzer")
         val file by parser.option(
             ArgType.String,
@@ -25,7 +28,10 @@ class NixQuizzer {
             description = "the number of minutes the quiz is allowed to take, default: 10m"
         )
         parser.parse(args)
-        val quiz = Quiz(questionCount ?: 10, timeLimit ?: 10)
+        getLogger().info("Quiz $uuid starting with file: $file")
+        getLogger().info("Quiz $uuid starting with questionCount: $questionCount")
+        getLogger().info("Quiz $uuid starting with timeLimit: $timeLimit")
+        val quiz = Quiz(uuid, questionCount ?: 10, timeLimit ?: 10)
         if (file?.isNotEmpty() == true) {
             try {
                 quiz.createQuestions(file!!)
@@ -41,6 +47,7 @@ class NixQuizzer {
         try {
             quiz.getQuestions()
             quiz.start();
+            getLogger().info("Quiz $uuid ending");
         } catch (ex: InvalidAttributesException) {
             println(TextColors.red("An unrecoverable error occurred. Quiz has ended prematurely"))
             println(ex.message?.let { TextColors.red(it) })
