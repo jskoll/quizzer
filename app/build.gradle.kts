@@ -28,6 +28,8 @@ kotlin {
                 implementation ("com.google.code.gson:gson:2.8.5")
                 implementation("com.github.ajalt.mordant:mordant:2.0.0-beta4")
                 implementation("com.github.kotlin-inquirer:kotlin-inquirer:0.1.0")
+                implementation("io.github.microutils:kotlin-logging-jvm:2.1.20")
+                implementation(group="ch.qos.logback", name="logback-classic", version="1.2.6")
             }
     }
 }
