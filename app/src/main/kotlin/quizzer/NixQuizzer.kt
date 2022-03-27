@@ -9,7 +9,7 @@ import javax.naming.directory.InvalidAttributesException
 
 class NixQuizzer {
     private val uuid = getUUid()
-    fun run(args: Array<String>) {
+    suspend fun run(args: Array<String>) {
         getLogger().info("Quiz $uuid starting");
         val parser = ArgParser("Quizzer")
         val file by parser.option(
@@ -31,7 +31,7 @@ class NixQuizzer {
         getLogger().info("Quiz $uuid starting with file: $file")
         getLogger().info("Quiz $uuid starting with questionCount: $questionCount")
         getLogger().info("Quiz $uuid starting with timeLimit: $timeLimit")
-        val quiz = Quiz(uuid, questionCount ?: 10, timeLimit ?: 10)
+        val quiz = Quiz(uuid, questionCount ?: 10, timeLimit?.toLong() ?: 10)
         if (file?.isNotEmpty() == true) {
             try {
                 quiz.createQuestions(file!!)
@@ -46,7 +46,7 @@ class NixQuizzer {
 
         try {
             quiz.getQuestions()
-            quiz.start();
+            quiz.run();
             getLogger().info("Quiz $uuid ending");
         } catch (ex: InvalidAttributesException) {
             println(TextColors.red("An unrecoverable error occurred. Quiz has ended prematurely"))

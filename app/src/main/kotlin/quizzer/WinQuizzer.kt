@@ -2,10 +2,15 @@ package quizzer
 
 import com.github.kinquirer.KInquirer
 import com.github.kinquirer.components.promptList
+import quizzer.utility.getLogger
 
 class WinQuizzer {
+    private val uuid = getUUid()
+    private val quiz = Quiz(uuid)
+    private var questionsToAsk = 10;
+    private var timeLimit = 10;
     fun run() {
-        var cont = true
+        getLogger().info("Quiz $uuid: starting")
         val mainMenuOptions = listOf(
             "Import Questions",
             "Set number of questions to ask (default: 10)",
@@ -31,6 +36,7 @@ class WinQuizzer {
             }
 
         }
+        getLogger().info("Quiz $uuid: ending")
     }
 
     private fun startQuiz() {
@@ -38,14 +44,63 @@ class WinQuizzer {
     }
 
     private fun setTimeLimit() {
-        TODO("Not yet implemented")
+        var time: Int? = null
+        var input: String? = null
+        var attempt = 0
+        while (time == null && attempt < 5) {
+            try {
+                attempt++
+                print("How many minutes should be given for this quiz?")
+                input = readLine()
+                if (input != null) {
+                    time = input.toInt()
+                    timeLimit = time;
+                }
+            } catch (exception: Exception) {
+                getLogger().info("Quiz $uuid: time limit of quiz invalid input ($input)")
+                time = null
+            }
+        }
     }
 
     private fun setNumberOfQuestions() {
-        TODO("Not yet implemented")
+        var questions: Int? = null
+        var input: String? = null
+        var attempt = 0
+        while (questions == null && attempt < 5) {
+            try {
+                attempt++
+                print("How many questions should this quiz include?")
+                input = readLine()
+                if (input != null) {
+                    questions = input.toInt()
+                    questionsToAsk = questions;
+                }
+            } catch (exception: Exception) {
+                getLogger().info("Quiz $uuid: Number of questions to ask invalid input ($input)")
+                questions = null
+            }
+        }
     }
 
     private fun importQuestions() {
-        TODO("Not yet implemented")
+        var file: String? = null
+        var attempt = 0;
+        while (file == null && attempt < 5) {
+            try {
+                attempt++
+                println("Import Questions:")
+                println("Enter an absolute or relative path to the question file to import:")
+                file = readLine()
+                if (file != null) {
+                    quiz.createQuestions(file)
+                } else {
+                    println("Enter a path to the question file to import")
+                }
+            } catch (exception: Exception) {
+                println("An Invalid file path provided unable to import questions")
+                file = null
+            }
+        }
     }
 }

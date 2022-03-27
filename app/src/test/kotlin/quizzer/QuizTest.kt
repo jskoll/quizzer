@@ -3,15 +3,18 @@ package quizzer
 import kotlin.test.Test
 import kotlin.test.assertFails
 import kotlin.test.assertTrue
+import java.util.*
+
+var uuid = UUID.randomUUID();
 
 class QuizTest {
     @Test fun validFileImport() {
-        val quiz = Quiz()
+        val quiz = Quiz(uuid)
         assertTrue { quiz.createQuestions("src/test/kotlin/quizzer/valid_test.q") }
     }
 
     @Test fun invalidFileImport() {
-        val quiz = Quiz()
+        val quiz = Quiz(uuid)
         assertFails { quiz.createQuestions("badFile.q") }
     }
 
@@ -21,7 +24,7 @@ class QuizTest {
 //    }
 
     @Test fun testMoreQuestionsRequestedThanQuestionsAvail(){
-        val quiz = Quiz(numberOfQuestions=10)
+        val quiz = Quiz(uuid, numberOfQuestions=10)
         assertFails { quiz.getQuestions() }
     }
 }

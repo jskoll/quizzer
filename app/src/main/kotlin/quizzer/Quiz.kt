@@ -14,19 +14,23 @@ import com.github.ajalt.mordant.rendering.TextStyles.*
 import com.github.kinquirer.KInquirer
 import com.github.kinquirer.components.*
 import com.google.gson.Gson
+import kotlinx.coroutines.*
 import quizzer.utility.getLogger
 import java.io.File
+import java.time.Duration
 import java.util.*
 import javax.naming.directory.InvalidAttributesException
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 import kotlin.math.round
 
-class Quiz  (
+
+class Quiz (
     private val uuid: UUID,
     private val numberOfQuestions: Int? = 10,
-    timeLimit: Int? = 10
+    private val timeLimit: Long? = 10
 ) {
+    private val MILLISECONDS_IN_MINUTE = 60000L;
     private val selectedQuestions  = mutableListOf<Question>()
     private val savedQuestionFile = "questions.qson"
     private val millisecondsInSecond = 1000
@@ -118,6 +122,64 @@ class Quiz  (
         return true
     }
 
+    suspend fun run() = runBlocking {
+        var correctAnswers = 0
+        var questionsAsked = 0
+        val startTime = System.currentTimeMillis()
+        println("\nStarting Quiz of ${selectedQuestions.size} questions\n")
+
+        try {
+            val duration = Duration.ofMinutes(timeLimit!!).toMillis()
+            val job = launch(Dispatchers.IO) {
+                repeat(selectedQuestions.size) { qIndex ->
+                    questionsAsked++
+                    val ans = askQuestion(qIndex)
+                    if (ans) {
+                        correctAnswers++
+                    }
+                    delay(5L)
+                }
+            }
+            launch (Dispatchers.Unconfined){
+                var delayedMs = 0L
+                while (delayedMs < duration && job.isActive) {
+                    delay(500L)
+                    delayedMs += 500
+                }
+                if (job.isActive) {
+                    job.cancelAndJoin()
+                    println("\n\nSorry, the timelimit for this quiz has ended.")
+                    println("$questionsAsked out of $numberOfQuestions were displayed\n\n")
+                    getLogger().info("Quiz $uuid: Time limit reached, quiz has ended")
+                    getLogger().info("Quiz $uuid: $questionsAsked out of $numberOfQuestions were displayed")
+                }
+                println(
+                    "Quiz has finished you got $correctAnswers out of ${selectedQuestions.size} " +
+                            "answers correct."
+                )
+                getLogger().info("Quiz $uuid: finished $correctAnswers out of ${selectedQuestions.size} correct")
+                val percent = round(correctAnswers.toFloat() / selectedQuestions.size * 100).toInt()
+                val letterGrade = when {
+                    percent >= 90 -> "A"
+                    percent >= 80 -> "B"
+                    percent >= 70 -> "C"
+                    percent >= 60 -> "D"
+                    else -> "F"
+
+                }
+                println("Your final score is $percent%")
+                print("Your grade is ")
+                println(letterGrade)
+                val quizTime = formatTimeFromMilliseconds(System.currentTimeMillis() - startTime)
+                getLogger().info("Quiz $uuid: Score $percent: Grade $letterGrade in $quizTime")
+                println("\nThis quiz took $quizTime to complete")
+            }
+        } catch (exception: Exception) {
+            println("NOT Sorry, the timelimit for this quiz has ended.")
+            println("$questionsAsked out of $numberOfQuestions were displayed")
+        }
+    }
+
     /**
      * Present and handle user input for this quiz.
      * This method:
@@ -128,68 +190,38 @@ class Quiz  (
      *      - Keeps track of how long this quiz has taken
      *      - Displays a score and grade at the end of the quiz
      */
-    fun start() {
-        var correctAnswers = 0
+    private suspend fun askQuestion(qIndex: Int): Boolean {
+        var correctAnswer = false
         var preText = ""
-        val startTime = System.currentTimeMillis()
-        println("\nStarting Quiz of ${selectedQuestions.size} questions\n")
-        quiz@ for (q in 0 until selectedQuestions.size) {
-            val text = selectedQuestions[q]
-            val correctAns = text.correctAnswer.toInt()
-            do {
-                if (preText.isNotEmpty()) {
-                    println(preText)
-                    Thread.sleep(1000)
-                }
-                val questionDisplay: String = KInquirer.promptList(
-                    message = "${q+1}: ${text.questionText}",
-                    choices = text.answers,
-                    hint = "Use the arrow keys to navigate options and click Enter to select",
-                    pageSize = 6
-                )
-                val ans = text.answers.indexOf(questionDisplay) + 1
-                if (ans < 1 || ans > text.answers.size)
-                    throw NumberFormatException()
 
-                getLogger().info("Quiz $uuid: Asking question ${q+1}: `${text.questionText}`")
-                preText = if (ans == correctAns) {
-                    getLogger().info("Quiz $uuid: Question ${q+1}: answered correctly")
-                    correctAnswers++
-                    "Congratulations! Your answer is correct."
-                } else {
-                    getLogger().info("Quiz $uuid: Question ${q+1}: answered incorrectly")
-                    "Sorry, your answer was not correct"
-                }
+        val text = selectedQuestions[qIndex]
+        val correctAns = text.correctAnswer.toInt()
+        val questionDisplay: String = KInquirer.promptList(
+            message = "${qIndex+1}: ${text.questionText}",
+            choices = text.answers,
+            hint = "Use the arrow keys to navigate options and click Enter to select",
+            pageSize = 6
+        )
+        val ans = text.answers.indexOf(questionDisplay) + 1
+        if (ans < 1 || ans > text.answers.size)
+            throw NumberFormatException()
 
-
-
-                val timeLeft = maxTime - (System.currentTimeMillis() - startTime)
-                if (timeLeft < 0)
-                    break@quiz
-            } while (true)
+        getLogger().info("Quiz $uuid: Asking question ${qIndex+1}: `${text.questionText}`")
+        preText = if (ans == correctAns) {
+            getLogger().info("Quiz $uuid: Question ${qIndex+1}: answered correctly")
+            correctAnswer = true
+            "Congratulations! Your answer is correct."
+        } else {
+            getLogger().info("Quiz $uuid: Question ${qIndex+1}: answered incorrectly")
+            "Sorry, your answer was not correct"
         }
 
-        println(preText)
-        Thread.sleep(1000)
-        clearConsole()
-        println("Quiz has finished you got $correctAnswers out of ${selectedQuestions.size} " +
-                "answers correct.")
-        getLogger().info("Quiz $uuid: finished $correctAnswers out of ${selectedQuestions.size} correct")
-        val percent = round(correctAnswers.toFloat() / selectedQuestions.size * 100).toInt()
-        val letterGrade = when {
-            percent >= 90 -> "A"
-            percent >= 80 -> "B"
-            percent >= 70 -> "C"
-            percent >= 60 -> "D"
-            else -> "F"
-
+        if (preText.isNotEmpty()) {
+            println(preText)
+            Thread.sleep(1000)
         }
-        println("Your final score is $percent%")
-        print("Your grade is ")
-        println(letterGrade)
-        val quizTime = formatTimeFromMilliseconds(System.currentTimeMillis() - startTime)
-        getLogger().info("Quiz $uuid: Score $percent: Grade $letterGrade in $quizTime")
-        println("\nThis quiz took $quizTime to complete")
+
+        return correctAnswer
     }
 
     /**

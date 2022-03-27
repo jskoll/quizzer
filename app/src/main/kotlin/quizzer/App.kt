@@ -26,7 +26,7 @@ import quizzer.utility.OS
 import quizzer.utility.getOS
 import java.util.*
 
-fun main(args: Array<String>) {
+suspend fun main(args: Array<String>) {
     val os = getOS()
     if (os == OS.MAC || os == OS.LINUX) {
         val nixQuizzer = NixQuizzer()
