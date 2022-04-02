@@ -9,7 +9,7 @@ class WinQuizzer {
     private val quiz = Quiz(uuid)
     private var questionsToAsk = 10;
     private var timeLimit = 10;
-    fun run() {
+    suspend fun run() {
         getLogger().info("Quiz $uuid: starting")
         val mainMenuOptions = listOf(
             "Import Questions",
@@ -39,8 +39,9 @@ class WinQuizzer {
         getLogger().info("Quiz $uuid: ending")
     }
 
-    private fun startQuiz() {
-        TODO("Not yet implemented")
+    suspend private fun startQuiz() {
+        quiz.getQuestions()
+        quiz.run();
     }
 
     private fun setTimeLimit() {
