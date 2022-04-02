@@ -17,7 +17,7 @@ The `quizzer.zip` file has executables that work on Windows 7/10, MacOS 12.2 (li
 tested on 12.2), and Ubuntu 20.04 (likely on any linux based system but only tested on Ubuntu)
 
 ## Running  quizzer
-Download a release from this [repo](https://github.com/jskoll/quizzer/releases/tag/1.0.0-beta.1)
+Download a release from this [repo](https://github.com/jskoll/quizzer/releases/tag/1.0.0-beta3)
 
 Extact the file (untar or unzip)
 
@@ -30,7 +30,7 @@ For MacOS/Linux the executable is `app`
 **Note** The app will let the user know if the answer was incorrect or not for 1 second before the next 
 question (or final grade) is displayed
 
-### CLI Options
+### CLI Options (Mac/Linux only)
 As with most CLI apps this app provides a help options to view all options provided. 
 
 The files are relative to the location you run the app from.  For example if you extract the file in your 
@@ -60,6 +60,11 @@ This uses the default number of questions and time limit
 ```shell
 app.bat -q 15 -tl 10
 ```
+### Windows 
+Quizzer includes a bat file in the release zip/tar file found within the extracted `bin` directory.  To run 
+double click on `app.bat`.  This will open up a command screen that displays a menu for quizzer.  You can 
+navigate this menu using your arrow (up/down) and select your option using the `ENTER` key.
+
 ### Acknowledgments
 This app has used a couple open source libraries which allow for making a more user-friendly command line
 app.
